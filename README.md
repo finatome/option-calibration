@@ -2,6 +2,8 @@
 
 A professional quantitative finance dashboard for calibrating continuous-time option pricing models to market data. This tool allows users to generate synthetic market data, test calibration algorithms, and visualize the results.
 
+![img](assets/sample.png)
+
 ## Features
 
 - **Synthetic Data Generation**: Create realistic option market surfaces using the Heston model with adjustable parameters (Spot, Rate, Kappa, Theta, VolVol, Rho, Noise).
