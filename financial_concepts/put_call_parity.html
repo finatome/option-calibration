@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="http://localhost:8050/docs/financial_concepts/put_call_parity.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Put-Call Parity - Option Price Calibration</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Put-Call Parity";
+        var mkdocs_page_input_path = "financial_concepts/put_call_parity.md";
+        var mkdocs_page_url = "/docs/financial_concepts/put_call_parity.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../index.html" class="icon icon-home"> Option Price Calibration
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Pricing Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/black_scholes.html">Black-Scholes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/heston.html">Heston Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/merton.html">Merton Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/bates.html">Bates Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/fft_pricing.html">FFT Pricing Methodology</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Calibration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/methodology.html">Methodology</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/algorithms.html">Algorithms</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/synthetic_data.html">Synthetic Data</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Visualization</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/dashboard.html">Dashboard Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/greeks.html">The Greeks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Financial Concepts</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Put-Call Parity</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-equation">The Equation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#intuition">Intuition</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#verification">Verification</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="delta_hedging.html">Delta Hedging</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Option Price Calibration</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html" class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Financial Concepts</li>
+      <li class="breadcrumb-item active">Put-Call Parity</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/example/option-calibration/edit/master/docs/financial_concepts/put_call_parity.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="put-call-parity">Put-Call Parity<a class="headerlink" href="#put-call-parity" title="Permanent link">&para;</a></h1>
+<p>Put-Call Parity is a fundamental principle in financial engineering that defines the relationship between the price of a European Call option (<span class="arithmatex">\(C\)</span>) and a European Put option (<span class="arithmatex">\(P\)</span>) with the same strike (<span class="arithmatex">\(K\)</span>) and expiration (<span class="arithmatex">\(T\)</span>).</p>
+<h2 id="the-equation">The Equation<a class="headerlink" href="#the-equation" title="Permanent link">&para;</a></h2>
+<p>For non-dividend paying stocks:</p>
+<div class="arithmatex">\[
+C + K e^{-rT} = P + S_0
+\]</div>
+<p>Where:
+-   <span class="arithmatex">\(C\)</span>: Call Option Price
+-   <span class="arithmatex">\(K e^{-rT}\)</span>: Present Value of the Strike Price (Cash)
+-   <span class="arithmatex">\(P\)</span>: Put Option Price
+-   <span class="arithmatex">\(S_0\)</span>: Current Spot Price of the Asset</p>
+<h2 id="intuition">Intuition<a class="headerlink" href="#intuition" title="Permanent link">&para;</a></h2>
+<p>This relationship relies on a no-arbitrage argument.
+-   <strong>Portfolio A</strong>: Buy a Call + Cash equal to PV(K).
+-   <strong>Portfolio B</strong>: Buy a Put + The Stock.</p>
+<p>At expiration <span class="arithmatex">\(T\)</span>:
+-   If <span class="arithmatex">\(S_T &gt; K\)</span>: Call is exercised (<span class="arithmatex">\(S_T - K\)</span>). Cash becomes <span class="arithmatex">\(K\)</span>. Total = <span class="arithmatex">\(S_T\)</span>.
+-   If <span class="arithmatex">\(S_T &lt; K\)</span>: Put is exercised (<span class="arithmatex">\(K - S_T\)</span>). Stock is <span class="arithmatex">\(S_T\)</span>. Total = <span class="arithmatex">\(K\)</span>.</p>
+<p>Both portfolios have the exact same payoff in all states. Therefore, they must have the same price today.</p>
+<h2 id="verification">Verification<a class="headerlink" href="#verification" title="Permanent link">&para;</a></h2>
+<p>The dashboard automatically verifies this condition.
+1.  When you calculate a <strong>European</strong> option price, the system implicitly calculates the corresponding option (Put for Call, Call for Put).
+2.  It checks the difference: <span class="arithmatex">\((C + Ke^{-rT}) - (P + S_0)\)</span>.
+3.  If the difference is close to zero, Parity Holds.</p>
+<blockquote>
+<p><strong>Note</strong>: This relationship does <strong>not</strong> strictly hold for American options due to the early exercise premium.</p>
+</blockquote>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../visualization/greeks.html" class="btn btn-neutral float-left" title="The Greeks"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="delta_hedging.html" class="btn btn-neutral float-right" title="Delta Hedging">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/example/option-calibration" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../visualization/greeks.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="delta_hedging.html" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/mathjax.js"></script>
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="http://localhost:8050/docs/models/merton.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Merton Model - Option Price Calibration</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Merton Model";
+        var mkdocs_page_input_path = "models/merton.md";
+        var mkdocs_page_url = "/docs/models/merton.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../index.html" class="icon icon-home"> Option Price Calibration
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Pricing Models</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="black_scholes.html">Black-Scholes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="heston.html">Heston Model</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Merton Model</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#model-dynamics">Model Dynamics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#pricing">Pricing</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#calibration">Calibration</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="bates.html">Bates Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="fft_pricing.html">FFT Pricing Methodology</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Calibration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/methodology.html">Methodology</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/algorithms.html">Algorithms</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/synthetic_data.html">Synthetic Data</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Visualization</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/dashboard.html">Dashboard Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/greeks.html">The Greeks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Financial Concepts</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../financial_concepts/put_call_parity.html">Put-Call Parity</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../financial_concepts/delta_hedging.html">Delta Hedging</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Option Price Calibration</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html" class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Pricing Models</li>
+      <li class="breadcrumb-item active">Merton Model</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/example/option-calibration/edit/master/docs/models/merton.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="merton-jump-diffusion-model">Merton Jump Diffusion Model<a class="headerlink" href="#merton-jump-diffusion-model" title="Permanent link">&para;</a></h1>
+<p>The Merton (1976) model incorporates discontinuous jumps in the asset price process, better capturing extreme market moves and fat-tailed return distributions.</p>
+<h2 id="model-dynamics">Model Dynamics<a class="headerlink" href="#model-dynamics" title="Permanent link">&para;</a></h2>
+<p>The asset price evolution includes a standard geometric Brownian motion plus a Poisson jump process:</p>
+<div class="arithmatex">\[
+\frac{dS_t}{S_{t-}} = (r - \lambda k)dt + \sigma dW_t + (e^J - 1)dN_t
+\]</div>
+<p>where:
+- <span class="arithmatex">\(r\)</span>: Risk-free rate.
+- <span class="arithmatex">\(\lambda\)</span>: Mean arrival rate of jumps (Poisson intensity).
+- <span class="arithmatex">\(k = E[e^J - 1]\)</span>: Expected jump size correction (martingale adjustment).
+- <span class="arithmatex">\(\sigma\)</span>: Diffusive volatility.
+- <span class="arithmatex">\(N_t\)</span>: Poisson process counting jumps.
+- <span class="arithmatex">\(J \sim N(\mu_J, \delta^2)\)</span>: Jump size (log-normal).</p>
+<h2 id="pricing">Pricing<a class="headerlink" href="#pricing" title="Permanent link">&para;</a></h2>
+<p>The European Call option price under Merton's model can be expressed as an infinite weighted sum of Black-Scholes prices:</p>
+<div class="arithmatex">\[
+C_{Merton} = \sum_{n=0}^{\infty} \frac{e^{-\lambda' T} (\lambda' T)^n}{n!} C_{BS}(S_n, K, T, r_n, \sigma_n)
+\]</div>
+<p>where the parameters are adjusted for the number of jumps <span class="arithmatex">\(n\)</span>.</p>
+<p>Alternatively, using the Lewis (2001) Fourier transform approach, the characteristic function is:</p>
+<div class="arithmatex">\[
+\phi(u, T) = \exp \left( i u \omega T - \frac{1}{2} u^2 \sigma^2 T + \lambda T ( e^{i u \mu_J - u^2 \delta^2/2} - 1 ) \right)
+\]</div>
+<h2 id="calibration">Calibration<a class="headerlink" href="#calibration" title="Permanent link">&para;</a></h2>
+<p>Calibration seeks to find <span class="arithmatex">\(\Theta = \{\sigma, \lambda, \mu_J, \delta\}\)</span> that minimizes the root mean squared error (RMSE) between model and market prices:</p>
+<div class="arithmatex">\[
+RMSE = \sqrt{\frac{1}{N} \sum_{i=1}^N (C_{market}^i - C_{Merton}^i(\Theta))^2}
+\]</div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="heston.html" class="btn btn-neutral float-left" title="Heston Model"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="bates.html" class="btn btn-neutral float-right" title="Bates Model">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/example/option-calibration" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="heston.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="bates.html" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/mathjax.js"></script>
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

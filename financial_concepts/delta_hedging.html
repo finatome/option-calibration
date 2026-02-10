@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="http://localhost:8050/docs/financial_concepts/delta_hedging.html" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Delta Hedging - Option Price Calibration</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Delta Hedging";
+        var mkdocs_page_input_path = "financial_concepts/delta_hedging.md";
+        var mkdocs_page_url = "/docs/financial_concepts/delta_hedging.html";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../index.html" class="icon icon-home"> Option Price Calibration
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Pricing Models</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/black_scholes.html">Black-Scholes</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/heston.html">Heston Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/merton.html">Merton Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/bates.html">Bates Model</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../models/fft_pricing.html">FFT Pricing Methodology</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Calibration</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/methodology.html">Methodology</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/algorithms.html">Algorithms</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../calibration/synthetic_data.html">Synthetic Data</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Visualization</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/dashboard.html">Dashboard Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../visualization/greeks.html">The Greeks</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Financial Concepts</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="put_call_parity.html">Put-Call Parity</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Delta Hedging</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#concept">Concept</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#dynamic-hedging">Dynamic Hedging</a>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Option Price Calibration</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html" class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Financial Concepts</li>
+      <li class="breadcrumb-item active">Delta Hedging</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/example/option-calibration/edit/master/docs/financial_concepts/delta_hedging.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="delta-hedging">Delta Hedging<a class="headerlink" href="#delta-hedging" title="Permanent link">&para;</a></h1>
+<p>Delta Hedging is a strategy used to reduce the risk associated with price movements in an underlying asset. By offsetting long and short positions, a portfolio can become "Delta Neutral," meaning its value remains unchanged for small movements in the underlying asset's price.</p>
+<h2 id="concept">Concept<a class="headerlink" href="#concept" title="Permanent link">&para;</a></h2>
+<p>The <strong>Delta (<span class="arithmatex">\(\Delta\)</span>)</strong> of an option represents the number of shares of the underlying stock that must be held to replicate the option's payoff for small price changes.
+-   <strong>Long Call</strong>: Positive Delta (Need to own shares).
+-   <strong>Short Call</strong>: Negative Delta (Need to short shares).</p>
+<p>If a bank sells a Call Option (Short Call), they are exposed to the risk of the stock rising. To hedge this:
+1.  Calculate <span class="arithmatex">\(\Delta\)</span>.
+2.  Buy <span class="arithmatex">\(\Delta\)</span> shares of the stock.
+3.  Portfolio = <span class="arithmatex">\(-1 \cdot C + \Delta \cdot S\)</span>.</p>
+<p>For small movements <span class="arithmatex">\(dS\)</span>, the change in portfolio value is:
+$$
+d\Pi = -1 \cdot dC + \Delta \cdot dS
+$$
+Since <span class="arithmatex">\(dC \approx \Delta \cdot dS\)</span>, then:
+$$
+d\Pi \approx -\Delta \cdot dS + \Delta \cdot dS = 0
+$$</p>
+<h2 id="dynamic-hedging">Dynamic Hedging<a class="headerlink" href="#dynamic-hedging" title="Permanent link">&para;</a></h2>
+<p>In the Black-Scholes-Merton framework, perfect replication requires continuous rebalancing of the portfolio because <span class="arithmatex">\(\Delta\)</span> changes constantly with time (<span class="arithmatex">\(t\)</span>) and asset price (<span class="arithmatex">\(S\)</span>).</p>
+<div class="arithmatex">\[
+\Delta_{BS} = N(d_1)
+\]</div>
+<ul>
+<li><strong>Gamma Risk</strong>: The rate of change of Delta (<span class="arithmatex">\(\Gamma\)</span>) dictates how frequently the hedge needs adjustment. High Gamma near expiration (for ATM options) makes hedging difficult and expensive.</li>
+<li><strong>Transaction Costs</strong>: In practice, continuous rebalancing is impossible due to transaction costs. Traders rebalance periodically (e.g., daily or when Delta moves beyond a threshold).</li>
+</ul>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="put_call_parity.html" class="btn btn-neutral float-left" title="Put-Call Parity"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/example/option-calibration" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="put_call_parity.html" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../javascripts/mathjax.js"></script>
+      <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
