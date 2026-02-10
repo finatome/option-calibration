@@ -1,0 +1,9 @@
+/* docs/stylesheets/extra.css */
+.wy-nav-content {
+    max-width: none !important;
+}
+
+/* Also ensure tables can expand */
+.wy-table-responsive table td, .wy-table-responsive table th {
+    white-space: normal;
+}

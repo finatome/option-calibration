@@ -67,7 +67,7 @@ def heston_price(S0, K, T, r, v0, kappa, theta, xi, rho, option_type='C'):
     
     call_value = max(0, S0 - np.exp(-r * T) * np.sqrt(S0 * K) / np.pi * int_value)
     
-    if option_type == 'P':
+    if option_type.upper().startswith('P'):
         # Put-Call Parity
         put_value = call_value - S0 + K * np.exp(-r * T)
         return put_value

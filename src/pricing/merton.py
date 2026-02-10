@@ -56,7 +56,7 @@ def merton_jump_diffusion_price(S0, K, T, r, sigma, lambda_j, mu_j, sigma_j, opt
         import math
         weight = np.exp(-lambda_prime * T) * (lambda_prime * T)**n / math.factorial(n)
         
-        bs_p, _ = black_scholes_price(S0, K, T, r_n, sigma_n, option_type)
+        bs_p, _ = black_scholes_price(S0, K, T, r_n, sigma_n, option_type.upper())
         
         price += weight * bs_p
         

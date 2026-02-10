@@ -20,7 +20,7 @@ def black_scholes_price(S, K, T, r, sigma, option_type='C'):
     # Handle scalar case specifically for efficiency and to avoid ambiguity errors
     if np.ndim(T) == 0:
          if T <= 0:
-            if option_type == 'C':
+            if option_type.upper().startswith('C'):
                 return max(S - K, 0), {}
             else:
                 return max(K - S, 0), {}
@@ -39,7 +39,7 @@ def black_scholes_price(S, K, T, r, sigma, option_type='C'):
     d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
 
-    if option_type == 'C':
+    if option_type.upper().startswith('C'):
         price = S * norm.cdf(d1) - K * np.exp(-r * T) * norm.cdf(d2)
         delta = norm.cdf(d1)
         rho = K * T * np.exp(-r * T) * norm.cdf(d2)

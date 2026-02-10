@@ -8,15 +8,18 @@ A professional quantitative finance dashboard for calibrating continuous-time op
 - **Model Calibration**: Calibrate three major pricing models to the generated data:
     - **Heston Stochastic Volatility Model** (Fourier-based pricing)
     - **Merton Jump Diffusion Model**
+    - **Bates Model** (Combined Stochastic Volatility + Jumps)
     - **Black-Scholes Model**
 - **Advanced Optimization**:
     - Select from multiple optimization algorithms (L-BFGS-B, SLSQP, Nelder-Mead, etc.).
     - Provide custom initial guesses for model parameters.
 - **Interactive Visualization**:
-    - **Calibration Surface**: 3D overlay of Model vs Market prices.
-    - **Error Analysis**: 3D residuals plot.
-    - **Implied Volatility Smile**: Comparison of Market and Model IVs.
-- **Reporting**: Real-time display of calibrated parameters, MSE/RMSE error, and status.
+    - **Calibration Surface**: Large, immersive 3D overlay of Model vs Market prices with enhanced lighting and transparency.
+    - **Error Analysis**: 3D residuals plot with zero-plane reference.
+    - **Implied Volatility Smile**: Multi-maturity comparison of Market and Model IVs with interactive legend.
+    - **Progress Indicators**: Glowing visual feedback during long calibration tasks.
+- **Reporting**: Real-time display of calibrated parameters, MSE/RMSE error, put-call parity checks, and convergence status.
+- **Education**: "Important Equations" panel displaying mathematical formulations for the selected model.
 
 ## Project Structure
 

@@ -5,40 +5,26 @@ repo_url: https://github.com/example/option-calibration
 
 use_directory_urls: false
 
-theme:
-  name: material
-  palette:
-    - scheme: default
-      primary: teal
-      accent: purple
-      toggle:
-        icon: material/brightness-7
-        name: Switch to dark mode
-    - scheme: slate
-      primary: teal
-      accent: lime
-      toggle:
-        icon: material/brightness-4
-        name: Switch to light mode
-  features:
-    - navigation.tabs
-    - navigation.sections
-    - navigation.top
-    - search.suggest
-    - search.highlight
-    - content.code.copy
+theme: readthedocs
 
 nav:
   - Home: index.md
   - Pricing Models:
-      - Heston Model: heston_model.md
-      - Merton Model: merton_model.md
+      - Black-Scholes: models/black_scholes.md
+      - Heston Model: models/heston.md
+      - Merton Model: models/merton.md
+      - Bates Model: models/bates.md
+      - FFT Pricing Methodology: models/fft_pricing.md
   - Calibration:
-      - Methodology: calibration.md
+      - Methodology: calibration/methodology.md
+      - Algorithms: calibration/algorithms.md
+      - Synthetic Data: calibration/synthetic_data.md
+  - Visualization:
+      - Dashboard Guide: visualization/dashboard.md
+      - The Greeks: visualization/greeks.md
   - Financial Concepts:
-      - Put-Call Parity: put_call_parity.md
-      - The Greeks: greeks.md
-      - Delta Hedging: delta_hedging.md
+      - Put-Call Parity: financial_concepts/put_call_parity.md
+      - Delta Hedging: financial_concepts/delta_hedging.md
 
 markdown_extensions:
   - admonition
@@ -54,6 +40,9 @@ markdown_extensions:
       generic: true
   - toc:
       permalink: true
+
+extra_css:
+  - stylesheets/extra.css
 
 extra_javascript:
   - javascripts/mathjax.js

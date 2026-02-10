@@ -5,7 +5,9 @@ Put-Call Parity is a fundamental principle in financial engineering that defines
 ## The Equation
 For non-dividend paying stocks:
 
-$$ C + K e^{-rT} = P + S_0 $$
+$$
+C + K e^{-rT} = P + S_0
+$$
 
 Where:
 -   $C$: Call Option Price

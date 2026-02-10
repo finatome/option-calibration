@@ -7,9 +7,11 @@ from scipy.stats import norm
 
 from src.data.synthetic import generate_option_surface
 from src.calibration.optimize import calibrate_model
-from src.pricing.heston import heston_price
+from src.pricing.heston import heston_price, heston_char_func
 from src.pricing.merton import merton_jump_diffusion_price
 from src.pricing.black_scholes import black_scholes_price
+from src.pricing.bates import bates_price, bates_char_func
+from src.pricing.fft import carr_madan_price
 
 def bs_implied_vol(S0, K, T, r, price, option_type='C'):
     """
@@ -80,7 +82,7 @@ def register_callbacks(app):
                 html.Tr([
                     html.Td("Calibration Objective"), 
                     html.Td(dcc.Markdown(r"$$\min_{\Theta} \sum_{i=1}^N (C_{mkt}^i - C_{Heston}^i(\Theta))^2$$", mathjax=True)), 
-                    html.Td(dcc.Markdown(r"Find $\Theta = \{v_0, \kappa, \theta, \xi, \rho\}$."))
+                    html.Td(dcc.Markdown(r"Find: $$\Theta = \{v_0, \kappa, \theta, \xi, \rho\}$$"))
                 ])
             ]
         elif model == 'Merton':
@@ -101,9 +103,25 @@ def register_callbacks(app):
                     html.Td("Infinite weighted sum of BS prices.")
                 ]),
                 html.Tr([
+                    html.Td(dcc.Markdown(r"Find: $$\Theta = \{\sigma, \lambda, \mu_J, \delta\}$$"))
+                ])
+            ]
+        elif model == 'Bates':
+             rows = [
+                html.Tr([
+                    html.Td("Bates SDEs"), 
+                    html.Td(dcc.Markdown(r"$$\begin{aligned} dS_t/S_{t-} &= (r-\lambda k)dt + \sqrt{v_t} dW_t^S + (e^J-1)dN_t \\ dv_t &= \kappa(\theta - v_t)dt + \xi \sqrt{v_t} dW_t^v \end{aligned}$$", mathjax=True)), 
+                    html.Td("Heston + Merton Jumps.")
+                ]),
+                html.Tr([
+                    html.Td("Characteristic Func"), 
+                    html.Td(dcc.Markdown(r"$$\phi_{Bates} = \phi_{Heston} \times \phi_{MertonJump}$$", mathjax=True)), 
+                    html.Td("Product of CFs due to independence.")
+                ]),
+                html.Tr([
                     html.Td("Calibration Objective"), 
-                    html.Td(dcc.Markdown(r"$$\min_{\Theta} \sum_{i=1}^N (C_{mkt}^i - C_{Merton}^i(\Theta))^2$$", mathjax=True)), 
-                    html.Td(dcc.Markdown(r"Find $\Theta = \{\sigma, \lambda, \mu_J, \delta\}$."))
+                    html.Td(dcc.Markdown(r"$$\min_{\Theta} \sum (C_{mkt} - C_{Bates}(\Theta))^2$$", mathjax=True)), 
+                    html.Td(dcc.Markdown(r"Find: $$\Theta = \{v_0, \kappa, \theta, \xi, \rho, \lambda, \mu_J, \delta\}$$"))
                 ])
             ]
         return dbc.Table([
@@ -160,7 +178,12 @@ def register_callbacks(app):
                  dbc.InputGroup([dbc.InputGroupText("κ"), dbc.Input(id="guess-p1", value=1.5, type="number", step=0.1)], size="sm", className="mb-1"),
                  dbc.InputGroup([dbc.InputGroupText("θ"), dbc.Input(id="guess-p2", value=0.04, type="number", step=0.01)], size="sm", className="mb-1"),
                  dbc.InputGroup([dbc.InputGroupText("ξ"), dbc.Input(id="guess-p3", value=0.3, type="number", step=0.1)], size="sm", className="mb-1"),
-                 dbc.InputGroup([dbc.InputGroupText("ρ"), dbc.Input(id="guess-p4", value=-0.5, type="number", step=0.1)], size="sm", className="mb-1"),
+                 dbc.InputGroup([
+                     dbc.InputGroupText("ρ"), dbc.Input(id="guess-p4", value=-0.5, type="number", step=0.1)
+                 ], size="sm", className="mb-1"),
+                 dcc.Input(id="guess-p5", value=0.1, type="hidden"),
+                 dcc.Input(id="guess-p6", value=-0.1, type="hidden"),
+                 dcc.Input(id="guess-p7", value=0.1, type="hidden"),
              ]
         elif model == 'Merton':
              return [
@@ -168,13 +191,18 @@ def register_callbacks(app):
                  dbc.InputGroup([dbc.InputGroupText("λ"), dbc.Input(id="guess-p1", value=1.0, type="number", step=0.1)], size="sm", className="mb-1"),
                  dbc.InputGroup([dbc.InputGroupText("μ_J"), dbc.Input(id="guess-p2", value=-0.1, type="number", step=0.05)], size="sm", className="mb-1"),
                  dbc.InputGroup([dbc.InputGroupText("σ_J"), dbc.Input(id="guess-p3", value=0.1, type="number", step=0.01)], size="sm", className="mb-1"),
-                 dcc.Store(id="guess-p4", data=0), # Dummy for Heston compatibility
+                 dcc.Input(id="guess-p4", value=0, type="hidden"), # Dummy for Heston compatibility
+                 dcc.Input(id="guess-p5", value=0, type="hidden"),
+                 dcc.Input(id="guess-p6", value=0, type="hidden"),
+                 dcc.Input(id="guess-p7", value=0, type="hidden"),
              ]
         elif model == 'BlackScholes':
              return [
                  dbc.InputGroup([dbc.InputGroupText("σ"), dbc.Input(id="guess-p0", value=0.2, type="number", step=0.01)], size="sm", className="mb-1"),
-                 dcc.Store(id="guess-p1", data=0), dcc.Store(id="guess-p2", data=0),
-                 dcc.Store(id="guess-p3", data=0), dcc.Store(id="guess-p4", data=0)
+                 dcc.Input(id="guess-p1", value=0, type="hidden"), dcc.Input(id="guess-p2", value=0, type="hidden"),
+                 dcc.Input(id="guess-p3", value=0, type="hidden"), dcc.Input(id="guess-p4", value=0, type="hidden"),
+                 dcc.Input(id="guess-p5", value=0, type="hidden"), dcc.Input(id="guess-p6", value=0, type="hidden"),
+                 dcc.Input(id="guess-p7", value=0, type="hidden")
              ]
         return []
 
@@ -188,11 +216,14 @@ def register_callbacks(app):
         [State("pricing-model", "value"),
          State("market-data-store", "data"),
          State("calib-method", "value"),
+         State("pricing-method", "value"),
          State("guess-p0", "value"), State("guess-p1", "value"),
          State("guess-p2", "value"), State("guess-p3", "value"),
-         State("guess-p4", "value")]
+         State("guess-p4", "value"),
+         State("guess-p5", "value"), State("guess-p6", "value"),
+         State("guess-p7", "value")]
     )
-    def run_calibration(n_clicks, model_name, market_json, method, p0, p1, p2, p3, p4):
+    def run_calibration(n_clicks, model_name, market_json, method, pricing_method, p0, p1, p2, p3, p4, p5, p6, p7):
         if not n_clicks or not market_json:
             return None, "Waiting...", "---", ""
         
@@ -207,6 +238,12 @@ def register_callbacks(app):
                 initial_guess = [float(p0), float(p1), float(p2), float(p3)]
             elif model_name == 'BlackScholes':
                 initial_guess = [float(p0)]
+            elif model_name == 'Bates':
+                # Catch potential non-existent inputs if switching quickly or layout desync
+                # But callback should trigger only after inputs exist
+                vals = [p0, p1, p2, p3, p4, p5, p6, p7]
+                initial_guess = [float(x) if x is not None else 0.1 for x in vals]
+
         except:
              return None, html.Span("Invalid Initial Guess", className="text-danger"), "Error", ""
 
@@ -223,6 +260,8 @@ def register_callbacks(app):
             param_names = ['sigma', 'lambda', 'mu_j', 'sigma_j']
         elif model_name == 'BlackScholes':
             param_names = ['sigma']
+        elif model_name == 'Bates':
+             param_names = ['v0', 'kappa', 'theta', 'xi', 'rho', 'lambda', 'mu_j', 'sigma_j']
             
         for i, val in enumerate(result['params']):
             name = param_names[i] if i < len(param_names) else f"p{i}"
@@ -237,24 +276,34 @@ def register_callbacks(app):
          Output("calibration-iv-smile", "figure")],
         [Input("market-data-store", "data"),
          Input("calibration-result-store", "data")],
-        [State("pricing-model", "value")]
+        [State("pricing-model", "value"),
+         State("pricing-method", "value")]
     )
-    def update_plots(market_json, calib_result, model_name):
-        # Default empty figures
+    def update_plots(market_json, calib_result, model_name, pricing_method):
+        # Common layout settings
+        common_layout = dict(
+            template='plotly_dark',
+            font=dict(family="Roboto, sans-serif", size=12),
+            margin=dict(l=40, r=40, t=40, b=40),
+            paper_bgcolor="#000000",
+            plot_bgcolor="rgba(0,0,0,0)"
+        )
+
         empty_fig = go.Figure()
-        empty_fig.update_layout(template='plotly_dark')
+        empty_fig.update_layout(**common_layout)
         
         if not market_json:
             return empty_fig, empty_fig, empty_fig
             
         df = pd.read_json(market_json, orient='split')
         
-        # 1. Market Surface (Always show market data)
+        # 1. Market Surface (High Contrast Scatter)
         fig_surface = go.Figure()
         fig_surface.add_trace(go.Scatter3d(
             x=df['Strike'], y=df['Maturity'], z=df['Price'],
-            mode='markers', marker=dict(size=4, color='cyan', opacity=0.8),
-            name='Market Data'
+            mode='markers', 
+            marker=dict(size=3, color='cyan', opacity=0.9, symbol='circle'),
+            name='Market Price'
         ))
         
         # 2. Model Surface (If calibrated)
@@ -265,23 +314,34 @@ def register_callbacks(app):
             iv_market = []
             iv_model = []
             
+            # Vectorized pricing would be faster, but loop is okay for small N
             for index, row in df.iterrows():
                 S0, K, T, r, opt_type = row['S0'], row['Strike'], row['Maturity'], row['r'], row['Type']
                 
-                # Pricing
+                # Pricing Dispatch
                 if model_name == 'Heston':
-                    p = heston_price(S0, K, T, r, *optimized_params, opt_type)
+                    if pricing_method == 'Carr-Madan':
+                        v0, kappa, theta, xi, rho = optimized_params
+                        cf = lambda u: heston_char_func(u, T, r, kappa, theta, xi, rho, v0)
+                        p = carr_madan_price(S0, K, T, r, cf)
+                    else:
+                        p = heston_price(S0, K, T, r, *optimized_params, opt_type)
                 elif model_name == 'Merton':
                     p = merton_jump_diffusion_price(S0, K, T, r, *optimized_params, opt_type)
                 elif model_name == 'BlackScholes':
                     p, _ = black_scholes_price(S0, K, T, r, optimized_params[0], opt_type)
+                elif model_name == 'Bates':
+                    if pricing_method == 'Carr-Madan':
+                        v0, kappa, theta, xi, rho, lamb, mu_j, sigma_j = optimized_params
+                        cf = lambda u: bates_char_func(u, T, r, kappa, theta, xi, rho, v0, lamb, mu_j, sigma_j)
+                        p = carr_madan_price(S0, K, T, r, cf)
+                    else:
+                        p = bates_price(S0, K, T, r, *optimized_params, opt_type)
                 else:
                     p = 0.0
                 model_prices.append(p)
                 
-                # IV Calculation (for Smile)
-                # Only calculate for one maturity to keep plot clean, or plot all?
-                # Let's calculate for all and filter later
+                # IV Calculation
                 iv_mkt = bs_implied_vol(S0, K, T, r, row['Price'], opt_type)
                 iv_mod = bs_implied_vol(S0, K, T, r, p, opt_type)
                 iv_market.append(iv_mkt)
@@ -292,36 +352,99 @@ def register_callbacks(app):
             df['IV_Model'] = iv_model
             df['Error'] = df['Price'] - df['Model_Price']
             
-            # Add Model Surface
+            # Add Model Surface (Improved Mesh)
             fig_surface.add_trace(go.Mesh3d(
                 x=df['Strike'], y=df['Maturity'], z=df['Model_Price'],
-                color='orange', opacity=0.5, name='Calibrated Model'
+                color='orange', opacity=0.7, 
+                intensity=df['Model_Price'], colorscale='Oranges',
+                flatshading=False,
+                name='Model Surface',
+                lighting=dict(ambient=0.5, diffuse=0.8, fresnel=0.5, specular=1.0, roughness=0.4),
+                lightposition=dict(x=100, y=200, z=150)
             ))
             
-            # 3. Error Plot
+            # 3. Error Plot (Enhanced)
             fig_error = go.Figure()
+            # Zero plane reference
+            fig_error.add_trace(go.Mesh3d(
+                x=[df['Strike'].min(), df['Strike'].max(), df['Strike'].max(), df['Strike'].min()],
+                y=[df['Maturity'].min(), df['Maturity'].min(), df['Maturity'].max(), df['Maturity'].max()],
+                z=[0, 0, 0, 0],
+                color='gray', opacity=0.3, name='Zero Error Plane'
+            ))
             fig_error.add_trace(go.Scatter3d(
                 x=df['Strike'], y=df['Maturity'], z=df['Error'],
-                mode='markers', marker=dict(size=5, color=df['Error'], colorscale='RdBu', showscale=True),
-                name='Residuals'
+                mode='markers', 
+                marker=dict(
+                    size=5, 
+                    color=df['Error'], 
+                    colorscale='RdBu', 
+                    showscale=True, 
+                    cmin=-max(abs(df['Error'].min()), abs(df['Error'].max())),
+                    cmax=max(abs(df['Error'].min()), abs(df['Error'].max()))
+                ),
+                name='Residuals',
+                hovertemplate="K: %{x}<br>T: %{y}<br>Err: %{z:.4f}<extra></extra>"
             ))
-            fig_error.update_layout(title="Calibration Residuals", scene=dict(zaxis_title='Error'), template='plotly_dark')
+            fig_error.update_layout(
+                title="Calibration Residuals", 
+                scene=dict(
+                    xaxis_title='Strike', yaxis_title='Maturity', zaxis_title='Error',
+                    camera=dict(eye=dict(x=1.5, y=1.5, z=0.5))
+                ), 
+                **common_layout
+            )
             
-            # 4. IV Smile (Select one maturity)
+            # 4. IV Smile (Multi-Maturity)
             unique_expiries = sorted(df['Maturity'].unique())
-            target_T = unique_expiries[len(unique_expiries)//2] # Middle maturity
-            subset = df[df['Maturity'] == target_T].sort_values('Strike')
-            
             fig_smile = go.Figure()
-            fig_smile.add_trace(go.Scatter(x=subset['Strike'], y=subset['IV_Market'], mode='markers', name=f'Market IV (T={target_T:.2f})'))
-            fig_smile.add_trace(go.Scatter(x=subset['Strike'], y=subset['IV_Model'], mode='lines', name=f'Model IV (T={target_T:.2f})'))
-            fig_smile.update_layout(title=f"Implied Volatility Smile (T={target_T:.2f})", xaxis_title="Strike", yaxis_title="Implied Vol", template='plotly_dark')
+            
+            # Use a color palette loop
+            colors = ['#00ffff', '#ff00ff', '#ffff00', '#00ff00', '#F0F8FF']
+            
+            for i, T in enumerate(unique_expiries):
+                subset = df[df['Maturity'] == T].sort_values('Strike')
+                color = colors[i % len(colors)]
+                
+                # Market Points
+                fig_smile.add_trace(go.Scatter(
+                    x=subset['Strike'], y=subset['IV_Market'], 
+                    mode='markers', 
+                    marker=dict(symbol='circle-open', color=color, size=8, line=dict(width=2)),
+                    name=f'Mkt T={T:.2f}',
+                    hovertemplate=f"T={T:.2f}<br>K=%{{x}}<br>IV=%{{y:.2%}}<extra></extra>"
+                ))
+                
+                # Model Line
+                fig_smile.add_trace(go.Scatter(
+                    x=subset['Strike'], y=subset['IV_Model'], 
+                    mode='lines', 
+                    line=dict(color=color, width=2, dash='solid'),
+                    name=f'Mod T={T:.2f}',
+                    hoverinfo='skip'
+                ))
+                
+            fig_smile.update_layout(
+                title=f"Implied Volatility Smile (All Maturities)", 
+                xaxis_title="Strike (K)", 
+                yaxis_title="Implied Volatility (IV)", 
+                legend=dict(x=1.02, y=1),
+                **common_layout
+            )
             
         else:
             fig_error = empty_fig
             fig_smile = empty_fig
             fig_surface.update_layout(title="Market Data Only (Calibrate to see Model)")
+            fig_surface.update_layout(**common_layout)
 
-        fig_surface.update_layout(title="Option Price Surface", scene=dict(xaxis_title='Strike', yaxis_title='Maturity', zaxis_title='Price'), template='plotly_dark')
+        fig_surface.update_layout(
+            title="Option Price Surface", 
+            scene=dict(
+                xaxis_title='Strike', yaxis_title='Maturity', zaxis_title='Price',
+                camera=dict(eye=dict(x=-1.5, y=-1.5, z=0.5))
+            ), 
+            **common_layout
+        )
 
         return fig_surface, fig_error, fig_smile

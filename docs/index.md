@@ -12,19 +12,19 @@ The platform provides a comprehensive environment for:
 
 ## Key Modules
 
-### [Pricing Models](heston_model.md)
+### [Pricing Models](models/heston.md)
 Detailed mathematical specifications and implementation details for:
 -   **Heston Stochastic Volatility Model**
 -   **Merton Jump Diffusion Model**
 -   **Black-Scholes Model**
 
-### [Calibration](calibration.md)
+### [Calibration](calibration/methodology.md)
 Methodologies for parameter estimation, including:
 -   Risk-neutral pricing objectives (MSE/RMSE).
 -   Optimization algorithms (L-BFGS-B, SLSQP, etc.).
 -   Parameter stability and uniqueness.
 
-### [Financial Concepts](greeks.md)
+### [Financial Concepts](visualization/greeks.md)
 Background on fundamental concepts:
 -   Put-Call Parity
 -   The Greeks (Delta, Gamma, Vega, Theta, Rho)

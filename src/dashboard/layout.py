@@ -58,6 +58,7 @@ def create_layout():
                 options=[
                     {'label': 'Heston Model', 'value': 'Heston'}, 
                     {'label': 'Merton Jump Diffusion', 'value': 'Merton'},
+                    {'label': 'Bates Model', 'value': 'Bates'},
                     {'label': 'Black-Scholes', 'value': 'BlackScholes'},
                 ],
                 value='BlackScholes',
@@ -82,6 +83,17 @@ def create_layout():
                         style={'color': 'black', 'font-size': '0.9rem'}
                     ),
                     html.Hr(),
+                    html.Label("Pricing Method"),
+                    dcc.Dropdown(
+                        id="pricing-method",
+                        options=[
+                            {'label': 'Lewis (Integration)', 'value': 'Lewis'},
+                            {'label': 'Carr-Madan (FFT)', 'value': 'Carr-Madan'}
+                        ],
+                        value='Lewis',
+                        style={'color': 'black', 'font-size': '0.9rem'}
+                    ),
+                    html.Hr(),
                     html.Label("Initial Guesses"),
                     
                     # Dynamic Initial Guess Inputs (Heston Default)
@@ -102,6 +114,9 @@ def create_layout():
                          dbc.InputGroup([
                              dbc.InputGroupText("ρ"), dbc.Input(id="guess-p4", value=-0.5, type="number", step=0.1)
                          ], size="sm", className="mb-1"),
+                         dcc.Input(id="guess-p5", value=0.1, type="hidden"),
+                         dcc.Input(id="guess-p6", value=-0.1, type="hidden"),
+                         dcc.Input(id="guess-p7", value=0.1, type="hidden"),
                     ])
                 ], title="Advanced Settings")
             ], start_collapsed=True, className="mb-3"),
@@ -117,13 +132,18 @@ def create_layout():
 
     # Middle Panel: Visualizations
     middle_panel = html.Div([
-        # Top Panel: Calibration Surface 
+        # Calibration Surface 
         dbc.Row([
             dbc.Col([
                 dbc.Card([
                     dbc.CardHeader("Calibration Surface (Market vs Model)", style=HEADER_STYLE),
                     dbc.CardBody([
-                        dcc.Graph(id="calibration-surface", style={"height": "450px"})
+                        dcc.Loading(
+                            id="loading-surface",
+                            type="circle",
+                            color="#00ffff",  # Cyan glow
+                            children=dcc.Graph(id="calibration-surface", style={"height": "600px"})
+                        )
                     ])
                 ], style=CARD_STYLE)
             ])
@@ -136,7 +156,12 @@ def create_layout():
                 dbc.Card([
                     dbc.CardHeader("Calibration Error (Residuals)", style=HEADER_STYLE),
                     dbc.CardBody([
-                        dcc.Graph(id="calibration-error", style={"height": "350px"})
+                        dcc.Loading(
+                            id="loading-error",
+                            type="circle",
+                            color="#00ffff",
+                            children=dcc.Graph(id="calibration-error", style={"height": "400px"})
+                        )
                     ])
                 ], style=CARD_STYLE)
             ], width=6),
@@ -144,10 +169,15 @@ def create_layout():
                 dbc.Card([
                     dbc.CardHeader("Implied Volatility Smile", style=HEADER_STYLE),
                     dbc.CardBody([
-                        dcc.Graph(id="calibration-iv-smile", style={"height": "350px"})
+                        dcc.Loading(
+                            id="loading-smile",
+                            type="circle",
+                            color="#00ffff",
+                            children=dcc.Graph(id="calibration-iv-smile", style={"height": "400px"})
+                        )
                     ])
                 ], style=CARD_STYLE)
-            ], width=6)
+            ], width=6),
         ]),
         html.Br(),
 
@@ -170,19 +200,26 @@ def create_layout():
         dbc.Card([
             dbc.CardHeader("Option Price", style=HEADER_STYLE),
             dbc.CardBody([
-                dbc.Row([
-                    dbc.Col([
-                        html.H6("Calibration Status", className="text-muted"),
-                        html.Div(id="calibration-status", className="text-info")
-                    ], width=12),
-                ]),
-                html.Hr(),
-                dbc.Row([
-                    dbc.Col([
-                        html.H6("RMSE Error", className="text-muted"),
-                        html.H4(id="calibration-rmse", className="text-danger")
-                    ], width=12),
-                ])
+                dcc.Loading(
+                    id="loading-status",
+                    type="dot",
+                    color="#00ffff",
+                    children=[
+                        dbc.Row([
+                            dbc.Col([
+                                html.H6("Calibration Status", className="text-muted"),
+                                html.Div(id="calibration-status", className="text-info")
+                            ], width=12),
+                        ]),
+                        html.Hr(),
+                        dbc.Row([
+                            dbc.Col([
+                                html.H6("RMSE Error", className="text-muted"),
+                                html.H4(id="calibration-rmse", className="text-danger")
+                            ], width=12),
+                        ])
+                    ]
+                )
             ])
         ], className="mb-3", style=CARD_STYLE),
         
